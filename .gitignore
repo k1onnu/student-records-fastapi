@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+*.db
+.env
+venv/
+env/
+ENV/
+*.log
+alembic/versions/*
+!alembic/versions/.keep
+.DS_Store
