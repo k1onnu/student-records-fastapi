@@ -90,3 +90,75 @@ def get_all_faculties_average(db: Session):
     ).all()
     
     return [{"faculty_name": r.name, "average_grade": float(r.average)} for r in results]
+
+
+
+
+# ----- task 3
+
+
+def update_student(db: Session, student_id: int, student_update: schemas.StudentCreate):
+    db_student = get_student(db, student_id)
+    if db_student:
+        db_student.first_name = student_update.first_name
+        db_student.last_name = student_update.last_name
+        db_student.faculty_id = student_update.faculty_id
+        db.commit()
+        db.refresh(db_student)
+    return db_student
+
+def delete_student(db: Session, student_id: int):
+    db_student = get_student(db, student_id)
+    if db_student:
+        db.delete(db_student)
+        db.commit()
+    return db_student
+
+# UPDATE и DELETE для оценок
+def update_grade(db: Session, grade_id: int, grade_update: schemas.GradeCreate):
+    db_grade = db.query(models.Grade).filter(models.Grade.id == grade_id).first()
+    if db_grade:
+        db_grade.student_id = grade_update.student_id
+        db_grade.course_id = grade_update.course_id
+        db_grade.grade = grade_update.grade
+        db.commit()
+        db.refresh(db_grade)
+    return db_grade
+
+def delete_grade(db: Session, grade_id: int):
+    db_grade = db.query(models.Grade).filter(models.Grade.id == grade_id).first()
+    if db_grade:
+        db.delete(db_grade)
+        db.commit()
+    return db_grade
+
+# Студенты по названию факультета
+def get_students_by_faculty_name(db: Session, faculty_name: str):
+    return db.query(models.Student).join(models.Faculty).filter(
+        models.Faculty.name == faculty_name
+    ).all()
+
+# Уникальные курсы
+def get_unique_courses(db: Session):
+    return db.query(models.Course).distinct().all()
+
+# Студенты по курсу с оценкой ниже 30
+def get_students_by_course_below_30(db: Session, course_name: str):
+    return db.query(models.Student).join(models.Grade).join(models.Course).filter(
+        models.Course.name == course_name,
+        models.Grade.grade < 30
+    ).all()
+
+# Средний балл по факультету (у вас уже есть get_faculty_average_grade)
+def get_average_grade_by_faculty_name(db: Session, faculty_name: str):
+    result = db.query(
+        func.avg(models.Grade.grade).label('average')
+    ).join(
+        models.Student, models.Grade.student_id == models.Student.id
+    ).join(
+        models.Faculty, models.Student.faculty_id == models.Faculty.id
+    ).filter(
+        models.Faculty.name == faculty_name
+    ).first()
+    
+    return result.average if result.average else 0.0

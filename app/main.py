@@ -1,10 +1,12 @@
 from fastapi import FastAPI
-from app.routers import students, grades
+from app.routers import students, grades, courses
+
 
 app = FastAPI(title="Student Grades API", description="API for managing student grades", version="1.0.0")
 
 app.include_router(students.router)
 app.include_router(grades.router)
+app.include_router(courses.router)
 
 @app.get("/")
 def root():

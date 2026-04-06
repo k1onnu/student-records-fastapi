@@ -37,3 +37,33 @@ def read_faculty_average(faculty_id: int, db: Session = Depends(get_db)):
 @router.get("/faculties/average", response_model=List[schemas.FacultyAverage])
 def read_all_faculties_average(db: Session = Depends(get_db)):
     return crud.get_all_faculties_average(db)
+
+
+
+# --- task 3
+
+# UPDATE оценки
+@router.put("/{grade_id}", response_model=schemas.Grade)
+def update_grade(
+    grade_id: int, 
+    grade: schemas.GradeCreate, 
+    db: Session = Depends(get_db)
+):
+    db_grade = crud.update_grade(db, grade_id, grade)
+    if db_grade is None:
+        raise HTTPException(status_code=404, detail="Grade not found")
+    return db_grade
+
+# DELETE оценки
+@router.delete("/{grade_id}")
+def delete_grade(grade_id: int, db: Session = Depends(get_db)):
+    db_grade = crud.delete_grade(db, grade_id)
+    if db_grade is None:
+        raise HTTPException(status_code=404, detail="Grade not found")
+    return {"message": "Grade deleted successfully"}
+
+# Средний балл по факультету (по названию)
+@router.get("/faculty/{faculty_name}/average")
+def get_faculty_average_by_name(faculty_name: str, db: Session = Depends(get_db)):
+    average = crud.get_average_grade_by_faculty_name(db, faculty_name)
+    return {"faculty_name": faculty_name, "average_grade": average}
