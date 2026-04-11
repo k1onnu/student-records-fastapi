@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import List, Optional
+from datetime import datetime
 
 class FacultyBase(BaseModel):
     name: str
@@ -62,3 +63,30 @@ class StudentWithGrades(Student):
 class FacultyAverage(BaseModel):
     faculty_name: str
     average_grade: float
+
+
+#===== new
+class UserBase(BaseModel):
+    username: str
+    email: str
+
+class UserCreate(UserBase):
+    password: str
+
+class UserResponse(UserBase):
+    id: int
+    is_active: bool
+    is_readonly: bool
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class Token(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
